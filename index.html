@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <!-- The above 3 meta tags *must* come first in the head; any other head content must come *after* these tags -->
+    <meta name="description" content="Visualisation of memory paging mechanism, including CPU, RAM and SWAP file">
+    <meta name="author" content="Marta Lapiņa, Andris Pakulis, Valters Gajevskis, Valdis Ādamsons, Ēriks Gopaks">
+    <link rel="icon" href="assets/images/favicon.png">
+    <link href="bootstrap3/css/bootstrap.min.css" rel="stylesheet">
+    <link href="assets/main.css" rel="stylesheet">
+    <link href="assets/bootstrap-slider.css" rel="stylesheet">
+    <title>Memory paging visualization</title>
+</head>
+<body style="background-color:#d2c0ce">
+<div class="container">
+    <!-- Main component for a primary marketing message or call to action -->
+    <div class="row">
+        <div class="well well-sm">
+            <div class="btn-group col-xs-3 algo-menu">
+                <button type="button" class="btn col-xs-12 btn-default dropdown-toggle ui-lockable" data-toggle="dropdown" aria-expanded="false">
+                    <span class="algo-text ">Choose algorithm</span><span class="caret"></span>
+                </button>
+                <input hidden id="algoinput" value=5>
+                <ul class="dropdown-menu " role="menu">
+                    <li><a class="algo-link" data-algo="0" href="#">FIFO/FCSF</a></li>
+                    <li><a class="algo-link" data-algo="1" href="#">Second-chance</a></li>
+                    <li><a class="algo-link" data-algo="2" href="#">LRU</a></li>
+                    <li><a class="algo-link" data-algo="3" href="#">LFU</a></li>
+                    <li><a class="algo-link" data-algo="4" href="#">MRU</a></li>
+                    <li><a class="algo-link" data-algo="6" href="#">MFU</a></li>
+                    <li><a class="algo-link" data-algo="5" href="#">Random</a></li>
+                </ul>
+            </div>
+            <button type="button" class="btn btn-success" id="start">
+                <span class="glyphicon glyphicon-play glyphicon-align-left" aria-hidden="true">Start</span>
+            </button>
+            <a href="home (2).html" class="btn btn-primary">Back</a>
+           
+            <button type="button" class="btn btn-success" style="display: none;" id="pause" data-started="0">
+                <span class="glyphicon glyphicon-pause glyphicon-align-left" aria-hidden="true">Pause</span>
+            </button>
+            <button type="button" class="btn btn-danger" style="display: none;" id="stop">
+		<span class="glyphicon glyphicon-stop glyphicon-align-left" aria-hidden="true">
+			Stop
+		</span>
+            </button>
+            <div class="pull-right">
+                &nbsp;&nbsp;&nbsp;
+                <button type="button" id="reset" class="btn btn-warning reset-all pull-right" aria-label="Left Align">
+                    <span class="" aria-hidden="true" >Reset</span>
+                </button>
+            </div>
+            <div class="pull-right" id="speedSliderContainer">
+                <span id="ex1CurrentSliderValLabel">Speed: <span id="ex1SliderVal">3X</span></span>
+                <input id="speedinput" hidden value=3>
+                <input id="ex1" type="text" data-slider-min="-1" data-slider-max="10" data-slider-step="1" data-slider-value="3" data-slider-tooltip="hide">
+            </div>
+        </div>
+    </div>
+    <div class="row" id="canvasrow">
+        <canvas id="c" style="border:1px solid black;" ></canvas>
+    </div>
+    <div class="row">&nbsp;</div>
+    <div class="row text-left">
+        <div class="well well-sm col-xs-4 pull-right">
+            <h4>Statistics:</h4>
+            <div class="row">
+                <div class="col-xs-6">Free memory:</div>
+                <div id="freeMemStat" class="col-xs-6">0</div>
+            </div>
+            <div class="row">
+                <div class="col-xs-6">Paged pool:</div>
+                <div id="pagePoolStat" class="col-xs-6">0</div>
+            </div>
+            <div class="row">
+                <div class="col-xs-6">Page hits:</div>
+                <div id="pageHitStat" class="col-xs-6">0</div>
+            </div>
+            <div class="row">
+                <div class="col-xs-6">Page faults:</div>
+                <div id="pageFaultStat" class="col-xs-6">0</div>
+            </div>
+        </div>
+        <div>
+            <!-- Process count slider -->
+            <input id="processmin" hidden value="1">
+            <input id="processmax" hidden value="8">
+            <div class="col-xs-3">
+                <span id="ex12bLabel">&nbsp;&nbsp;&nbsp;Process count: </span>
+            </div>
+            <input id="ex12b"  type="text"  class="slider ui-lockable" data-slider-step="1" data-slider-min="1" data-slider-max="20"  /><br/>
+        </div>
+        <div>
+            <div class="col-xs-3">
+        <span> &nbsp;&nbsp;&nbsp; </span>
+            </div>
+            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+        </div>
+        <div>
+            <!-- Page count per process slider -->
+            <input id="processPageCountMin" hidden value="1">
+            <input id="processPageCountMax" hidden value="5">
+            <div class="col-xs-3">
+                <span id="ex13bLabel">&nbsp;&nbsp;&nbsp;Page per process count: </span>
+            </div>
+            <input id="ex13b"  type="text"  class="slider ui-lockable" data-slider-step="1" data-slider-min="1" data-slider-max="64"  /><br/>
+        </div>
+        <div>
+            <!-- RamSize -->
+            <input id="ex6" type="text" class="slider ui-lockable"  data-slider-min="9" data-slider-max="23" data-slider-step="1" data-slider-tooltip="hide" data-slider-value="9"/>
+            <input id="ramsize" hidden value="512">
+            <div class="col-xs-3">
+                <span id="ex6CurrentSliderValLabel">&nbsp;&nbsp;&nbsp;Ram size: </span>
+            </div>
+            &nbsp;&nbsp;&nbsp;<span id="ex6SliderVal">512 KB</span>
+        </div>
+        <div>
+            <!-- Frame Size -->
+            <input id="ex7" type="text" class="slider ui-lockable"  data-slider-min="2" data-slider-max="7" data-slider-step="1"
+                   data-slider-tooltip="hide" data-slider-value="5"/>
+            <input id="framesize" hidden value="32">
+            <div class="col-xs-3">
+                <span id="ex7CurrentSliderValLabel">&nbsp;&nbsp;&nbsp;Page size: </span>
+            </div>
+            &nbsp;&nbsp;&nbsp;<span id="ex7SliderVal">32 KB</span>
+        </div>
+        <!-- Frame Count -->
+        <div class="col-xs-3">
+            <span>&nbsp;&nbsp;&nbsp;Page count:</span>
+            <input hidden id="framecount" value=16 />
+        </div>
+        <strong class="framecount-label">16</strong>
+        <div>
+            <!-- Virtual memory Size -->
+            <input id="ex8" type="text" class="slider ui-lockable" data-slider-min="9" data-slider-max="26" data-slider-step="1" data-slider-tooltip="hide" data-slider-value="10"/>
+            <input id="virtmemsize" hidden value="1024">
+            <div class="col-xs-3">
+                <span id="ex8CurrentSliderValLabel">&nbsp;&nbsp;&nbsp;Virtual memory size: </span>
+            </div>
+            &nbsp;&nbsp;&nbsp;<span id="ex8SliderVal">1024 KB</span>
+        </div>
+        <div>
+            <!-- Swap size Size -->
+            <input id="swapsize" hidden value="512">
+            <div class="col-xs-3">
+                <span id="ex9CurrentSliderValLabel">&nbsp;&nbsp;&nbsp;Swap size: </span>
+            </div>
+            <input id="ex9" type="text" class="slider ui-lockable" data-slider-min="9" data-slider-max="28" data-slider-step="1" data-slider-tooltip="hide" data-slider-value="11"/>
+            &nbsp;&nbsp;&nbsp;<span id="ex9SliderVal">2048 KB</span>
+        </div>
+    </div>
+    <div class="row" id="table-content">
+	<table id="state_table" class="table table-bordered">
+	<thead></thead>
+	<tbody></tbody>	
+	</table>
+    </div>
+    <div class="row">
+        <div id="console-out" class="well well-sm">
+            <p>Output:</p>
+        </div>
+    </div>
+    <div class="bsod" style="display: none;">
+        <img src="assets/bsod.png" alt="Blue Screen of Death">
+    </div>
+</div>
+<!-- Modal -->
+<div class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                <h4 class="modal-title" id="myModalLabel">Error!</h4>
+            </div>
+            <div class="modal-body">
+                <p id="modal-text"></p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                <!--<button type="button" class="btn btn-primary">Save changes</button>-->
+            </div>
+        </div>
+    </div>
+</div>
+<!-- Bootstrap core JavaScript
+================================================== -->
+<!-- Placed at the end of the document so the pages load faster -->
+<script src="assets/jquery.min.js"></script>
+<script src="bootstrap3/js/bootstrap.min.js"></script>
+<script src="assets/fabric.min.js" ></script>
+<script src="assets/bootstrap-slider.js" ></script>
+<script src="javascript/user-interface.js"></script>
+<script src="javascript/data.js"></script>
+<script src="javascript/api.js"></script>
+<script src="javascript/fabri-code.js"></script>
+<script src="javascript/graphics.js"></script>
+<script src="javascript/algorithms/simple.js"></script>
+<script src="javascript/algorithms/fifo.js"></script>
+<script src="javascript/algorithms/LRU.js"></script>
+<script src="javascript/algorithms/MRU.js"></script>
+<script src="javascript/algorithms/LFU.js"></script>
+<script src="javascript/algorithms/MFU.js"></script>
+<script src="javascript/algorithms/random.js"></script>
+<script src="javascript/algorithms/second_chance.js"></script>
+<script src="javascript/process.js"></script>
+</body>
+</html>

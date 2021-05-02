@@ -1,0 +1,59 @@
+#ex1Slider .slider-selection {
+	background: #BABABA;
+}
+#c{
+width:100%;
+height:100%;
+}
+
+#canvasrow{
+min-width:600px;
+}
+
+#console-out{
+    /*font-family: "Comic Sans MS", cursive, sans-serif;*/
+    font-family: "Trebuchet MS", Helvetica, sans-serif;
+
+
+}
+#console-out.well{
+    background-color: #202620;
+}
+#console-out>p{
+    color: #be1126;
+    margin:0;
+
+}
+#console-out>p>span{
+    color: #0bbe18;
+    margin:0;
+}
+#speedSliderContainer{
+    padding-top: 6px;
+}
+#slider12b .slider-selection {
+    background: gray;
+}
+#slider13b .slider-selection {
+    background: gray;
+}
+.bsod{
+    position:absolute;
+    top:0;
+    left:0;
+}
+
+.cell-elem{
+    float: left;
+    padding-right: 2px;
+    padding-left: 2px;
+    border: green solid 1px;
+    margin: 1px;
+    margin-right: 2px;
+    text-align: center;
+}
+
+.table-row-header{
+    /*background: lightgrey;*/
+    /*margin-left: 15px;*/
+}
